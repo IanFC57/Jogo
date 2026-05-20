@@ -10,6 +10,7 @@ Este projeto Unity é um FPS de terror com prioridade absoluta para Android real
 - A sensibilidade mobile padrão da câmera é `MobileCameraRules.DefaultTouchSensitivity` (`0.144`), 20% acima do valor antigo `0.12`. Mantenha a cena de jogo serializada com o mesmo valor.
 - Toques nos botões de atirar e recarregar nunca podem girar a câmera.
 - Os botões de atirar e recarregar ficam na região inferior direita para preservar a visibilidade do cenário no centro e no lado direito da tela.
+- Os botões visuais de atirar e recarregar devem permanecer 50% maiores que o layout antigo, com espaço suficiente entre eles e sem bloquear o centro da tela.
 - O jogador deve conseguir andar com o joystick e olhar ao redor com um segundo dedo ao mesmo tempo.
 - O eixo horizontal do joystick faz strafe para esquerda/direita. O eixo vertical move para frente/trás em relação ao yaw atual do jogador.
 - Os auxiliares de movimento, mouse look e head bob do pacote Easy Weapons devem ficar desativados no Android. Pitch e roll da câmera mobile não podem vir de head bob, eixos de mouse ou movimento do joystick.
@@ -65,6 +66,7 @@ Este projeto Unity é um FPS de terror com prioridade absoluta para Android real
 - `Assets/Editor/AndroidBuild.cs`: gera APKs versionadas e expõe `Tools/Android/Build APK Igual Ao Script`.
 - `Assets/Editor/AndroidBrandingAndTypography.cs`: aplica ícone Android e padroniza textos de Canvas com TextMeshPro.
 - A tela inicial deve manter os botões funcionais com a mesma fonte, mesmo tamanho fixo e sem autosizing; não reative o botão duplicado sem ação `Button (Legacy) (1)`.
+- A tela final deve manter título de fase concluída, subtítulo atmosférico e botões `Jogar novamente`, `Menu inicial` e `Sair do jogo`.
 - `Assets/Tests/EditMode`: testes de contrato para toque mobile, vetores de movimento, regras runtime, munição, recarga, dano inimigo, áudio de monstro e spawn.
 
 ## Regras De Trabalho

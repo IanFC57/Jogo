@@ -32,6 +32,7 @@ Cada dedo tem uma função desde o momento em que toca a tela até terminar.
 - Movimento é reservado pelo retângulo real do joystick. A zona reserva fica apenas na área inferior esquerda do joystick, não na metade esquerda inteira da tela.
 - Atirar é reservado na zona inferior direita do botão de disparo.
 - Recarregar é reservado na zona inferior direita do botão de recarga, à esquerda do botão de atirar.
+- Os botões visuais de `Atirar` e `Recarregar` ficam 50% maiores que o layout antigo para facilitar toque em celular, mantendo espaço entre eles e sem voltar para o meio da tela.
 - O olhar da câmera pode começar em qualquer outra parte da tela fora dos controles reservados.
 
 Os valores normalizados exatos ficam em `Assets/Scripts Geral/Controles/Core/MobileTouchZones.cs` e são cobertos por testes.

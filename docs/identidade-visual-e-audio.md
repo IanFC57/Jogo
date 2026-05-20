@@ -17,6 +17,7 @@ Este documento registra o padrão atual de apresentação do jogo no Android.
 - Textos de botões devem usar auto size e peso em negrito para manter legibilidade em celulares.
 - Na tela inicial, os botões funcionais são exceção: devem usar o mesmo tamanho fixo de fonte, sem autosizing, para que `Sair` não fique maior que `Começar jogo`.
 - O botão duplicado sem ação `Button (Legacy) (1)` deve permanecer inativo para não aparecer em telas Android largas.
+- A tela de encerramento deve comunicar conclusão de fase com título curto, subtítulo atmosférico e três ações claras: `Jogar novamente`, `Menu inicial` e `Sair do jogo`.
 - Textos de HUD, como vida, aviso e munição, devem manter `raycastTarget = false` para não bloquear input mobile.
 - Ao adicionar novos textos, prefira TextMeshPro desde o início e valide em tela pequena.
 

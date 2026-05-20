@@ -46,3 +46,12 @@
 - Versão instalada confirmada: `versionCode=42`, `versionName=1.0.42`, `lastUpdateTime=2026-05-20 18:20:38`.
 - A captura `Screenshots/asylum-v42-menu-typography.png` confirmou a tela inicial com `Começar jogo` e `Sair` usando o mesmo padrão de fonte, sem o botão duplicado sem ação.
 - O log `Logs/device-v42-menu-typography.log` confirmou que o app permaneceu rodando sem `FATAL EXCEPTION`, crash, `NullReferenceException` ou `MissingMethodException` do processo do jogo.
+
+## Validação Da v43
+
+- Em `2026-05-20`, a APK `Builds/Android/AsylumHorror-43.apk` foi gerada com `versionCode=43` e `versionName=1.0.43`.
+- A APK v43 foi instalada no aparelho `RQ8RB09CM6D`, com `lastUpdateTime=2026-05-20 20:09:49`.
+- A tela de encerramento passou a exibir título, subtítulo e ações `Jogar novamente`, `Menu inicial` e `Sair do jogo`.
+- Os botões mobile `Atirar` e `Recarregar` foram aumentados em 50% e continuam na região inferior direita.
+- Testes EditMode v43: 81 testes executados, 81 aprovados.
+- O build Android v43 foi concluído sem `warning CS`, sem `error CS`, sem falha Gradle e sem resíduos antigos de Code Coverage.

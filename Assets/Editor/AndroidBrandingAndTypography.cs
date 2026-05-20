@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using TMPro;
 using UnityEditor;
+using UnityEditor.Events;
 using UnityEditor.Build;
 using UnityEditor.SceneManagement;
 using UnityEditor.Android;
@@ -213,6 +214,12 @@ public static class AndroidBrandingAndTypography
             return;
         }
 
+        if (scene.path.EndsWith("Final.unity", StringComparison.OrdinalIgnoreCase))
+        {
+            ApplyVictoryLayout(scene, fontAsset);
+            return;
+        }
+
         if (!scene.path.EndsWith("JogoComMenu.unity", StringComparison.OrdinalIgnoreCase))
             return;
 
@@ -239,12 +246,12 @@ public static class AndroidBrandingAndTypography
             wrapping: TextWrappingModes.Normal);
 
         ConfigureActionButton(scene, fontAsset, "Botao_Recarregar", "Recarregar",
-            anchoredPosition: new Vector2(-342f, 116f),
-            size: new Vector2(210f, 86f));
+            anchoredPosition: new Vector2(-484f, 130f),
+            size: new Vector2(315f, 129f));
 
         ConfigureActionButton(scene, fontAsset, "Botao_Atirar", "Atirar",
-            anchoredPosition: new Vector2(-118f, 116f),
-            size: new Vector2(190f, 86f));
+            anchoredPosition: new Vector2(-170f, 130f),
+            size: new Vector2(285f, 129f));
     }
 
     private static void ApplyMainMenuLayout(Scene scene, TMP_FontAsset fontAsset)
@@ -308,6 +315,178 @@ public static class AndroidBrandingAndTypography
         if (sceneObject != null)
         {
             sceneObject.SetActive(active);
+        }
+    }
+
+    private static void ApplyVictoryLayout(Scene scene, TMP_FontAsset fontAsset)
+    {
+        Canvas canvas = FindSceneComponent<Canvas>(scene);
+        if (canvas == null)
+            return;
+
+        RectTransform canvasRect = canvas.GetComponent<RectTransform>();
+        if (canvasRect == null)
+            return;
+
+        ConfigureVictoryText(
+            canvasRect,
+            fontAsset,
+            "Texto_TituloFinal",
+            "Fase concluida",
+            new Vector2(0f, 220f),
+            new Vector2(1120f, 96f),
+            58f,
+            new Color(0.86f, 0.08f, 0.06f, 1f),
+            FontStyles.Bold);
+
+        ConfigureVictoryText(
+            canvasRect,
+            fontAsset,
+            "Texto_SubtituloFinal",
+            "Voce atravessou a noite. O silencio ainda esta observando.",
+            new Vector2(0f, 130f),
+            new Vector2(1180f, 78f),
+            31f,
+            new Color(0.92f, 0.82f, 0.75f, 1f),
+            FontStyles.Normal);
+
+        MenuVitoria victoryMenu = FindSceneComponent<MenuVitoria>(scene);
+        ConfigureVictoryButton(scene, fontAsset, victoryMenu, "Button (Legacy)", "Jogar novamente", "Reiniciar", new Vector2(0f, -130f));
+        ConfigureVictoryButton(scene, fontAsset, victoryMenu, "Button (Legacy) (1)", "Menu inicial", "IrParaMenu", new Vector2(0f, -232f));
+        ConfigureVictoryButton(scene, fontAsset, victoryMenu, "Button (Legacy) (2)", "Sair do jogo", "SairDoJogo", new Vector2(0f, -334f));
+    }
+
+    private static void ConfigureVictoryText(
+        RectTransform parent,
+        TMP_FontAsset fontAsset,
+        string objectName,
+        string content,
+        Vector2 anchoredPosition,
+        Vector2 size,
+        float fontSize,
+        Color color,
+        FontStyles style)
+    {
+        TextMeshProUGUI text = EnsureTextObject(parent, objectName);
+        RectTransform rect = text.GetComponent<RectTransform>();
+        rect.anchorMin = new Vector2(0.5f, 0.5f);
+        rect.anchorMax = new Vector2(0.5f, 0.5f);
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.anchoredPosition = anchoredPosition;
+        rect.sizeDelta = size;
+        rect.localScale = Vector3.one;
+
+        text.text = content;
+        text.font = fontAsset;
+        text.color = color;
+        text.fontStyle = style;
+        text.fontSize = fontSize;
+        text.enableAutoSizing = false;
+        text.fontSizeMin = fontSize;
+        text.fontSizeMax = fontSize;
+        text.alignment = TextAlignmentOptions.Center;
+        text.textWrappingMode = TextWrappingModes.Normal;
+        text.overflowMode = TextOverflowModes.Truncate;
+        text.raycastTarget = false;
+        text.extraPadding = true;
+    }
+
+    private static TextMeshProUGUI EnsureTextObject(RectTransform parent, string objectName)
+    {
+        Transform existing = FindChildRecursive(parent, objectName);
+        if (existing != null)
+        {
+            TextMeshProUGUI existingText = existing.GetComponent<TextMeshProUGUI>();
+            if (existingText != null)
+                return existingText;
+        }
+
+        GameObject textObject = new GameObject(objectName, typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
+        textObject.layer = parent.gameObject.layer;
+        textObject.transform.SetParent(parent, false);
+        return textObject.GetComponent<TextMeshProUGUI>();
+    }
+
+    private static void ConfigureVictoryButton(
+        Scene scene,
+        TMP_FontAsset fontAsset,
+        MenuVitoria victoryMenu,
+        string buttonName,
+        string label,
+        string methodName,
+        Vector2 anchoredPosition)
+    {
+        GameObject buttonObject = FindSceneObject(scene, buttonName);
+        if (buttonObject == null)
+            return;
+
+        buttonObject.SetActive(true);
+
+        RectTransform buttonRect = buttonObject.GetComponent<RectTransform>();
+        if (buttonRect != null)
+        {
+            buttonRect.anchorMin = new Vector2(0.5f, 0.5f);
+            buttonRect.anchorMax = new Vector2(0.5f, 0.5f);
+            buttonRect.pivot = new Vector2(0.5f, 0.5f);
+            buttonRect.anchoredPosition = anchoredPosition;
+            buttonRect.sizeDelta = new Vector2(480f, 82f);
+            buttonRect.localScale = Vector3.one;
+        }
+
+        Button button = buttonObject.GetComponent<Button>();
+        if (button != null && victoryMenu != null)
+        {
+            ConfigureVictoryButtonAction(button, victoryMenu, methodName);
+        }
+
+        TextMeshProUGUI text = buttonObject.GetComponentInChildren<TextMeshProUGUI>(true);
+        if (text == null)
+            return;
+
+        RectTransform textRect = text.GetComponent<RectTransform>();
+        if (textRect != null)
+        {
+            textRect.anchorMin = Vector2.zero;
+            textRect.anchorMax = Vector2.one;
+            textRect.pivot = new Vector2(0.5f, 0.5f);
+            textRect.anchoredPosition = Vector2.zero;
+            textRect.sizeDelta = Vector2.zero;
+            textRect.localScale = Vector3.one;
+        }
+
+        text.text = label;
+        text.font = fontAsset;
+        text.color = new Color(0.98f, 0.05f, 0.04f, 1f);
+        text.fontStyle |= FontStyles.Bold;
+        text.fontSize = 31f;
+        text.enableAutoSizing = false;
+        text.fontSizeMin = 31f;
+        text.fontSizeMax = 31f;
+        text.alignment = TextAlignmentOptions.Center;
+        text.textWrappingMode = TextWrappingModes.NoWrap;
+        text.overflowMode = TextOverflowModes.Truncate;
+        text.raycastTarget = false;
+        text.extraPadding = true;
+    }
+
+    private static void ConfigureVictoryButtonAction(Button button, MenuVitoria victoryMenu, string methodName)
+    {
+        for (int i = button.onClick.GetPersistentEventCount() - 1; i >= 0; i--)
+        {
+            UnityEventTools.RemovePersistentListener(button.onClick, i);
+        }
+
+        switch (methodName)
+        {
+            case nameof(MenuVitoria.Reiniciar):
+                UnityEventTools.AddPersistentListener(button.onClick, victoryMenu.Reiniciar);
+                break;
+            case nameof(MenuVitoria.IrParaMenu):
+                UnityEventTools.AddPersistentListener(button.onClick, victoryMenu.IrParaMenu);
+                break;
+            case nameof(MenuVitoria.SairDoJogo):
+                UnityEventTools.AddPersistentListener(button.onClick, victoryMenu.SairDoJogo);
+                break;
         }
     }
 
@@ -389,10 +568,10 @@ public static class AndroidBrandingAndTypography
         text.text = label;
         text.font = fontAsset;
         text.fontStyle |= FontStyles.Bold;
-        text.fontSize = 24f;
+        text.fontSize = 30f;
         text.enableAutoSizing = true;
-        text.fontSizeMin = 16f;
-        text.fontSizeMax = 26f;
+        text.fontSizeMin = 22f;
+        text.fontSizeMax = 34f;
         text.alignment = TextAlignmentOptions.Center;
         text.textWrappingMode = TextWrappingModes.NoWrap;
         text.overflowMode = TextOverflowModes.Truncate;
@@ -408,6 +587,19 @@ public static class AndroidBrandingAndTypography
             Transform found = FindChildRecursive(roots[i].transform, objectName);
             if (found != null)
                 return found.gameObject;
+        }
+
+        return null;
+    }
+
+    private static T FindSceneComponent<T>(Scene scene) where T : Component
+    {
+        GameObject[] roots = scene.GetRootGameObjects();
+        for (int i = 0; i < roots.Length; i++)
+        {
+            T component = roots[i].GetComponentInChildren<T>(true);
+            if (component != null)
+                return component;
         }
 
         return null;
