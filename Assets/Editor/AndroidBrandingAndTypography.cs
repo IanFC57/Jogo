@@ -13,6 +13,7 @@ public static class AndroidBrandingAndTypography
 {
     private const string IconPath = "Assets/AppIcon/AsylumHorrorIcon.png";
     private const string FontPath = "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF.asset";
+    private const float MainMenuButtonFontSize = 34f;
 
     [MenuItem("Tools/Android/Apply Branding And Typography")]
     public static void Apply()
@@ -85,9 +86,17 @@ public static class AndroidBrandingAndTypography
             .Select(scene => scene.path)
             .ToArray();
 
+        Scene activeScene = SceneManager.GetActiveScene();
+
         for (int i = 0; i < scenePaths.Length; i++)
         {
-            Scene scene = EditorSceneManager.OpenScene(scenePaths[i], OpenSceneMode.Single);
+            Scene scene = GetLoadedSceneByPath(scenePaths[i]);
+            bool closeSceneAfterProcessing = !scene.IsValid() || !scene.isLoaded;
+            if (closeSceneAfterProcessing)
+            {
+                scene = EditorSceneManager.OpenScene(scenePaths[i], OpenSceneMode.Additive);
+            }
+
             Text[] legacyTexts = UnityEngine.Object.FindObjectsByType<Text>(FindObjectsInactive.Include, FindObjectsSortMode.None);
             int converted = 0;
 
@@ -112,7 +121,29 @@ public static class AndroidBrandingAndTypography
             ApplySceneSpecificLayout(scene, fontAsset);
             EditorSceneManager.SaveScene(scene);
             Debug.Log($"Typography updated in {scenePaths[i]}: {converted} legacy Text components converted.");
+
+            if (closeSceneAfterProcessing)
+            {
+                EditorSceneManager.CloseScene(scene, true);
+            }
         }
+
+        if (activeScene.IsValid() && activeScene.isLoaded)
+        {
+            EditorSceneManager.SetActiveScene(activeScene);
+        }
+    }
+
+    private static Scene GetLoadedSceneByPath(string scenePath)
+    {
+        for (int i = 0; i < SceneManager.sceneCount; i++)
+        {
+            Scene scene = SceneManager.GetSceneAt(i);
+            if (scene.path == scenePath)
+                return scene;
+        }
+
+        return default;
     }
 
     private static void ConvertTextComponent(Text legacyText, TMP_FontAsset fontAsset)
@@ -176,6 +207,12 @@ public static class AndroidBrandingAndTypography
 
     private static void ApplySceneSpecificLayout(Scene scene, TMP_FontAsset fontAsset)
     {
+        if (scene.path.EndsWith("MenuInicial.unity", StringComparison.OrdinalIgnoreCase))
+        {
+            ApplyMainMenuLayout(scene, fontAsset);
+            return;
+        }
+
         if (!scene.path.EndsWith("JogoComMenu.unity", StringComparison.OrdinalIgnoreCase))
             return;
 
@@ -208,6 +245,70 @@ public static class AndroidBrandingAndTypography
         ConfigureActionButton(scene, fontAsset, "Botao_Atirar", "Atirar",
             anchoredPosition: new Vector2(-118f, 116f),
             size: new Vector2(190f, 86f));
+    }
+
+    private static void ApplyMainMenuLayout(Scene scene, TMP_FontAsset fontAsset)
+    {
+        ConfigureMainMenuButton(scene, fontAsset, "Button (Legacy)", "Come\u00e7ar jogo", new Vector2(0f, -125f));
+        ConfigureMainMenuButton(scene, fontAsset, "Button (Legacy) (2)", "Sair", new Vector2(0f, -235f));
+        SetSceneObjectActive(scene, "Button (Legacy) (1)", false);
+    }
+
+    private static void ConfigureMainMenuButton(Scene scene, TMP_FontAsset fontAsset, string buttonName, string label, Vector2 anchoredPosition)
+    {
+        GameObject buttonObject = FindSceneObject(scene, buttonName);
+        if (buttonObject == null)
+            return;
+
+        buttonObject.SetActive(true);
+
+        RectTransform buttonRect = buttonObject.GetComponent<RectTransform>();
+        if (buttonRect != null)
+        {
+            buttonRect.anchorMin = new Vector2(0.5f, 0.5f);
+            buttonRect.anchorMax = new Vector2(0.5f, 0.5f);
+            buttonRect.pivot = new Vector2(0.5f, 0.5f);
+            buttonRect.anchoredPosition = anchoredPosition;
+            buttonRect.sizeDelta = new Vector2(430f, 82f);
+            buttonRect.localScale = Vector3.one;
+        }
+
+        TextMeshProUGUI text = buttonObject.GetComponentInChildren<TextMeshProUGUI>(true);
+        if (text == null)
+            return;
+
+        RectTransform textRect = text.GetComponent<RectTransform>();
+        if (textRect != null)
+        {
+            textRect.anchorMin = Vector2.zero;
+            textRect.anchorMax = Vector2.one;
+            textRect.pivot = new Vector2(0.5f, 0.5f);
+            textRect.anchoredPosition = Vector2.zero;
+            textRect.sizeDelta = Vector2.zero;
+            textRect.localScale = Vector3.one;
+        }
+
+        text.text = label;
+        text.font = fontAsset;
+        text.fontStyle |= FontStyles.Bold;
+        text.fontSize = MainMenuButtonFontSize;
+        text.enableAutoSizing = false;
+        text.fontSizeMin = MainMenuButtonFontSize;
+        text.fontSizeMax = MainMenuButtonFontSize;
+        text.alignment = TextAlignmentOptions.Center;
+        text.textWrappingMode = TextWrappingModes.NoWrap;
+        text.overflowMode = TextOverflowModes.Truncate;
+        text.raycastTarget = false;
+        text.extraPadding = true;
+    }
+
+    private static void SetSceneObjectActive(Scene scene, string objectName, bool active)
+    {
+        GameObject sceneObject = FindSceneObject(scene, objectName);
+        if (sceneObject != null)
+        {
+            sceneObject.SetActive(active);
+        }
     }
 
     private static void ConfigureHudText(

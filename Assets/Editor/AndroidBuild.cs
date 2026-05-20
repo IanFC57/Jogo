@@ -1,49 +1,25 @@
 using System;
 using System.IO;
-using System.Linq;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
 
 public static class AndroidBuild
 {
+    [MenuItem("Tools/Android/Build APK Igual Ao Script")]
     public static void BuildApk()
     {
-        string buildDir = Environment.GetEnvironmentVariable("ANDROID_BUILD_DIR");
-        if (string.IsNullOrWhiteSpace(buildDir))
-        {
-            buildDir = Path.Combine(Directory.GetCurrentDirectory(), "Builds", "Android");
-        }
-
-        Directory.CreateDirectory(buildDir);
-
-        string versionCodeText = Environment.GetEnvironmentVariable("ANDROID_VERSION_CODE");
-        int versionCode = PlayerSettings.Android.bundleVersionCode + 1;
-        if (!string.IsNullOrWhiteSpace(versionCodeText) && int.TryParse(versionCodeText, out int parsedVersionCode))
-        {
-            versionCode = parsedVersionCode;
-        }
-
-        PlayerSettings.Android.bundleVersionCode = versionCode;
-        PlayerSettings.bundleVersion = $"1.0.{versionCode}";
-        EditorUserBuildSettings.buildAppBundle = false;
-        EditorUserBuildSettings.androidBuildSystem = AndroidBuildSystem.Gradle;
+        string buildDir = AndroidBuildConsistency.ResolveBuildDirectory();
+        int versionCode = AndroidBuildConsistency.ResolveScriptVersionCode();
         EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Android, BuildTarget.Android);
+        AndroidBuildConsistency.ApplyVersionCode(versionCode);
+        AndroidBuildConsistency.ApplySharedSettings();
+        AndroidBrandingAndTypography.Apply();
 
-        string[] scenes = EditorBuildSettings.scenes
-            .Where(scene => scene.enabled)
-            .Select(scene => scene.path)
-            .ToArray();
-
-        if (scenes.Length == 0)
-        {
-            throw new InvalidOperationException("No enabled scenes found in EditorBuildSettings.");
-        }
+        string[] scenes = AndroidBuildConsistency.GetEnabledScenes();
 
         string apkPath = Path.Combine(buildDir, $"AsylumHorror-{versionCode}.apk");
-        BuildOptions buildOptions = ShouldBuildDevelopment()
-            ? BuildOptions.Development
-            : BuildOptions.None;
+        BuildOptions buildOptions = AndroidBuildConsistency.ResolveBuildOptions();
 
         BuildPlayerOptions options = new BuildPlayerOptions
         {
@@ -53,22 +29,23 @@ public static class AndroidBuild
             options = buildOptions
         };
 
-        BuildReport report = BuildPipeline.BuildPlayer(options);
-        BuildSummary summary = report.summary;
+        AndroidBuildConsistency.BeginScriptBuild();
+        BuildReport report;
+        try
+        {
+            report = BuildPipeline.BuildPlayer(options);
+        }
+        finally
+        {
+            AndroidBuildConsistency.EndScriptBuild();
+        }
 
+        BuildSummary summary = report.summary;
         Debug.Log($"Android build result: {summary.result}, output: {apkPath}, size: {summary.totalSize}");
 
         if (summary.result != BuildResult.Succeeded)
         {
             throw new InvalidOperationException($"Android build failed: {summary.result}");
         }
-    }
-
-    private static bool ShouldBuildDevelopment()
-    {
-        string value = Environment.GetEnvironmentVariable("ANDROID_DEVELOPMENT_BUILD");
-        return value == "1" ||
-            value?.Equals("true", StringComparison.OrdinalIgnoreCase) == true ||
-            value?.Equals("yes", StringComparison.OrdinalIgnoreCase) == true;
     }
 }

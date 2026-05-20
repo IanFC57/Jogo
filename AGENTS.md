@@ -22,6 +22,8 @@ Este projeto Unity é um FPS de terror com prioridade absoluta para Android real
 - Rode os testes EditMode de input mobile depois de tocar em câmera, joystick, UI ou ponte de toque.
 - Rode os testes EditMode de combate inimigo depois de tocar em vida de monstro, hitboxes, roteamento de dano da arma ou tempo de spawn.
 - Para comportamento Android, gere uma APK nova com `versionCode` novo antes de testar no aparelho.
+- Builds Android feitos pelo Editor e pelo script devem passar por `AndroidBuildConsistency`: package id, IL2CPP, arquiteturas, APK, ícone e tipografia precisam sair iguais.
+- O menu `Tools/Android/Build APK Igual Ao Script` usa o mesmo método do build em linha de comando. O `Build Player` normal do Unity também recebe o preflight Android antes de empacotar.
 - Ao testar em um Android físico, feche o app antigo, instale a APK nova, confirme `versionCode`/`versionName` e só então abra o jogo.
 - O emulador não substitui a validação final quando há celular físico conectado.
 
@@ -59,7 +61,10 @@ Este projeto Unity é um FPS de terror com prioridade absoluta para Android real
 - `Assets/Scripts Geral/ScriptsCorredor/MonsterFollow.cs`: controla perseguição, recuperação de rota, abertura de portas, dano de ataque, áudio de proximidade, áudio de ataque, áudio de morte e desligamento de som quando o monstro é desativado ou morto.
 - `Assets/Scripts Geral/ScriptsCorredor/EnemyHealth.cs`: controla vida do monstro, hitboxes, zonas de dano e notificação de morte.
 - `Assets/Scripts Geral/ScriptsCorredor/EnemyHitbox.cs`: roteia tiros para a zona correta de dano do monstro.
+- `Assets/Editor/AndroidBuildConsistency.cs`: centraliza as configurações Android compartilhadas entre build por script e build pelo Editor.
+- `Assets/Editor/AndroidBuild.cs`: gera APKs versionadas e expõe `Tools/Android/Build APK Igual Ao Script`.
 - `Assets/Editor/AndroidBrandingAndTypography.cs`: aplica ícone Android e padroniza textos de Canvas com TextMeshPro.
+- A tela inicial deve manter os botões funcionais com a mesma fonte, mesmo tamanho fixo e sem autosizing; não reative o botão duplicado sem ação `Button (Legacy) (1)`.
 - `Assets/Tests/EditMode`: testes de contrato para toque mobile, vetores de movimento, regras runtime, munição, recarga, dano inimigo, áudio de monstro e spawn.
 
 ## Regras De Trabalho

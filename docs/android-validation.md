@@ -27,6 +27,8 @@ Use um aparelho Android físico para a validação final de controles, HUD, áud
 
 ## Build
 
+O build Android é centralizado em `AndroidBuildConsistency`. O menu `Tools/Android/Build APK Igual Ao Script` chama o mesmo método usado em linha de comando e gera a APK em `Builds/Android`. O `Build Player` normal do Unity também executa o mesmo preflight antes de empacotar Android, incluindo package id, IL2CPP, arquiteturas, APK em vez de AAB, ícone e tipografia.
+
 Gere a APK com o helper do projeto:
 
 ```powershell

@@ -2,7 +2,8 @@
     "name": "MobileInput.EditModeTests",
     "rootNamespace": "",
     "references": [
-        "MobileControls.Core"
+        "MobileControls.Core",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [
         "Editor"

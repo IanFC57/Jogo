@@ -30,6 +30,8 @@ O projeto é um jogo de terror Unity para Android. A prioridade atual é jogabil
 
 ## Notas De Build
 
-- `Assets/Editor/AndroidBuild.cs` gera APKs versionadas em `Builds/Android`.
+- `Assets/Editor/AndroidBuildConsistency.cs` centraliza package id, IL2CPP, stripping, arquiteturas ARMv7/ARM64, APK em vez de AAB, orientação landscape, ícone e tipografia.
+- `Assets/Editor/AndroidBuild.cs` gera APKs versionadas em `Builds/Android` e também aparece no menu `Tools/Android/Build APK Igual Ao Script`.
+- O `Build Player` normal do Unity recebe o mesmo preflight Android antes de empacotar. Assim, quando a pessoa gera APK pelo Editor, as configurações críticas ficam alinhadas ao script.
 - O aparelho usado nos testes recentes é `RQ8RB09CM6D`.
 - Um resultado limpo significa ausência de erros e avisos C# no log atual de build/teste. Ruídos de licença, pacote ou inicialização da Unity devem ser analisados separadamente antes de alterar dependências.

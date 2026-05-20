@@ -32,3 +32,17 @@
 - Linhas de inicialização Android/Unity podem aparecer antes do gameplay. Avalie apenas como problema se estiverem associadas ao PID do jogo ou a exceções reais do app.
 - Capturas da validação v39: `Screenshots/asylum-v39-ui-branding-fonts-beast-audio.png`, `Screenshots/asylum-v39-after-fire.png` e `Screenshots/asylum-v39-after-reload.png`.
 - Logs da validação v39: `Logs/device-v39-ui-branding-fonts-beast-audio.log` e `Logs/device-v39-after-fire-reload.log`.
+
+## Validação De Paridade De Build
+
+- Em `2026-05-20`, o build por script gerou `Builds/Android/AsylumHorror-41.apk` com sucesso.
+- O log `Logs/build-v41-editor-build-parity-script.log` confirmou o preflight `AndroidBuildConsistency` antes do empacotamento.
+- A checagem por `aapt dump badging` confirmou `package=com.IanHeitor.AsylumHorror`, `versionCode=41`, `versionName=1.0.41`, `sdkVersion=26`, `targetSdkVersion=33` e código nativo `arm64-v8a`/`armeabi-v7a`.
+- O log limpo da v41 não registrou `warning CS`, `error CS`, `Fatal Error`, `BuildFailedException`, `BUILD FAILED` nem resíduos antigos de Code Coverage.
+
+## Validação Da Tela Inicial
+
+- Em `2026-05-20`, a APK `Builds/Android/AsylumHorror-42.apk` foi instalada no aparelho `RQ8RB09CM6D`.
+- Versão instalada confirmada: `versionCode=42`, `versionName=1.0.42`, `lastUpdateTime=2026-05-20 18:20:38`.
+- A captura `Screenshots/asylum-v42-menu-typography.png` confirmou a tela inicial com `Começar jogo` e `Sair` usando o mesmo padrão de fonte, sem o botão duplicado sem ação.
+- O log `Logs/device-v42-menu-typography.log` confirmou que o app permaneceu rodando sem `FATAL EXCEPTION`, crash, `NullReferenceException` ou `MissingMethodException` do processo do jogo.
