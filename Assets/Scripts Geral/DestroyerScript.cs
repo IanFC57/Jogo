@@ -12,9 +12,21 @@ public class DestroyerScript : MonoBehaviour {
         Time.timeScale = 1;
     }
 
-    void OnTriggerEnter2D(Collider2D outro){
+    private void OnTriggerEnter(Collider outro)
+    {
+        HandleTriggerEnter(outro.gameObject);
+    }
 
-        if (outro.gameObject.tag == "Player")
+#if !UNITY_ANDROID || UNITY_EDITOR
+    private void OnTriggerEnter2D(Collider2D outro)
+    {
+        HandleTriggerEnter(outro.gameObject);
+    }
+#endif
+
+    private void HandleTriggerEnter(GameObject outro)
+    {
+        if (outro.CompareTag("Player"))
         {
             Time.timeScale = 0;
             GameOver.gameObject.SetActive(true);
@@ -22,10 +34,10 @@ public class DestroyerScript : MonoBehaviour {
         }
         else
         {
-            if (outro.gameObject.transform.parent)
-                Destroy(outro.gameObject.transform.parent.gameObject);
+            if (outro.transform.parent)
+                Destroy(outro.transform.parent.gameObject);
             else
-                Destroy(outro.gameObject);
+                Destroy(outro);
         }
 	}
 }

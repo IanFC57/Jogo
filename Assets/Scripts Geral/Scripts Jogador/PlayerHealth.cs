@@ -1,24 +1,43 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI; // <-- NOVA LINHA: Biblioteca obrigatória para mexer com Canvas/Textos
+using UnityEngine.UI;
+using TMPro;
 
 public class PlayerHealth : MonoBehaviour
 {
     public int vidaMaxima = 100;
-    private int vidaAtual;
+    public int regeneracaoVida = PlayerHealthRules.DefaultRegenerationAmount;
+    public float intervaloRegeneracao = PlayerHealthRules.DefaultRegenerationIntervalSeconds;
+    public Text textoDeVida;
+    public TMP_Text textoDeVidaTmp;
 
-    public Text textoDeVida; // <-- NOVA LINHA: Uma "caixa" vazia para colocarmos o nosso texto da tela
+    private int vidaAtual;
+    private float temporizadorRegeneracao;
+
+    public int VidaAtual => vidaAtual;
 
     void Start()
     {
+        ResolverTextoDeVida();
         vidaAtual = vidaMaxima;
-        AtualizarTextoDaTela(); // Já arruma o texto assim que o jogo começar
+        AtualizarTextoDaTela();
+    }
+
+    void Update()
+    {
+        temporizadorRegeneracao += Time.deltaTime;
+        if (!PlayerHealthRules.ShouldRegenerate(temporizadorRegeneracao, intervaloRegeneracao, vidaAtual, vidaMaxima))
+            return;
+
+        temporizadorRegeneracao = 0f;
+        RecuperarVida(regeneracaoVida);
     }
 
     public void TomarDano(int quantidadeDeDano)
     {
-        vidaAtual -= quantidadeDeDano;
-        AtualizarTextoDaTela(); // Arruma o texto sempre que apanhar
+        vidaAtual = PlayerHealthRules.ApplyDamage(vidaAtual, quantidadeDeDano);
+        temporizadorRegeneracao = 0f;
+        AtualizarTextoDaTela();
 
         if (vidaAtual <= 0)
         {
@@ -26,13 +45,43 @@ public class PlayerHealth : MonoBehaviour
         }
     }
 
-    // Esta função muda a palavra na tela para mostrar a vida certa
+    public void RecuperarVida(int quantidade)
+    {
+        int novaVida = PlayerHealthRules.ApplyRegeneration(vidaAtual, vidaMaxima, quantidade);
+        if (novaVida == vidaAtual)
+            return;
+
+        vidaAtual = novaVida;
+        AtualizarTextoDaTela();
+    }
+
     void AtualizarTextoDaTela()
     {
+        ResolverTextoDeVida();
+        string texto = "Vida: " + vidaAtual;
+
+        if (textoDeVidaTmp != null)
+        {
+            textoDeVidaTmp.text = texto;
+        }
+
         if (textoDeVida != null)
         {
-            textoDeVida.text = "Vida: " + vidaAtual;
+            textoDeVida.text = texto;
         }
+    }
+
+    private void ResolverTextoDeVida()
+    {
+        if (textoDeVida != null || textoDeVidaTmp != null)
+            return;
+
+        GameObject objetoTexto = GameObject.Find("Texto_Vida");
+        if (objetoTexto == null)
+            return;
+
+        textoDeVida = objetoTexto.GetComponent<Text>();
+        textoDeVidaTmp = objetoTexto.GetComponent<TMP_Text>();
     }
 
     void Morrer()

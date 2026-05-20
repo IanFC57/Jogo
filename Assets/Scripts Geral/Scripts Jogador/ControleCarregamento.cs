@@ -1,40 +1,52 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class ControleRecarregamento : MonoBehaviour
 {
-    [Header("Arraste o seu Jogador (Inventário) aqui:")]
+    [Header("Inventario do jogador")]
     public InventarioJogador inventario;
 
-    [Header("Arraste a sua Arma aqui:")]
+    [Header("Arma equipada")]
     public GameObject armaEquipada;
 
-    [Header("Configuração")]
-    public int tamanhoDoPente = 12; // Quantas balas entram na arma por recarga
+    [Header("Configuracao antiga")]
+    public int tamanhoDoPente = 12;
 
     public void TentarRecarregar()
     {
-        // O Porteiro verifica: Tem bala no bolso?
-        if (inventario.balasNoBolso > 0)
+        if (inventario == null || armaEquipada == null)
         {
-            // 1. Manda a ordem para o Easy Weapons fazer a animação e o som
-            armaEquipada.SendMessage("Reload", SendMessageOptions.DontRequireReceiver);
+            Debug.LogWarning("Recarga sem inventario ou arma configurada.");
+            return;
+        }
 
-            // 2. Desconta do nosso bolso o valor do pente
-            inventario.balasNoBolso -= tamanhoDoPente;
+        Weapon weapon = armaEquipada.GetComponent<Weapon>();
+        if (weapon == null)
+        {
+            Debug.LogWarning("A arma equipada nao tem o componente Weapon.");
+            return;
+        }
 
-            // 3. Garante que a matemática não deixe suas balas negativas
-            if (inventario.balasNoBolso < 0)
-            {
-                inventario.balasNoBolso = 0;
-            }
+        if (!weapon.NeedsAmmo)
+        {
+            Debug.Log("O pente ja esta cheio.");
+            return;
+        }
 
-            Debug.Log("Recarregou! Balas no bolso: " + inventario.balasNoBolso);
+        if (inventario.balasNoBolso <= 0)
+        {
+            Debug.Log("Sem balas no inventario. Vasculhe os armarios.");
+            return;
+        }
+
+        int consumedAmmo = weapon.ReloadFromReserve(inventario.balasNoBolso);
+        if (consumedAmmo > 0)
+        {
+            inventario.balasNoBolso -= consumedAmmo;
+            Debug.Log("Recarregou " + consumedAmmo + " bala(s). Reserva: " + inventario.balasNoBolso);
         }
         else
         {
-            Debug.Log("Sem balas no inventário! Vá vasculhar os armários!");
+            Debug.Log("Nao foi possivel recarregar agora.");
         }
     }
 }

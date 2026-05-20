@@ -1,32 +1,62 @@
 using System.Collections;
-using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
-using UnityEngine.UI; // Necessário para mexer com textos
-using System.Collections; // Necessário para o temporizador
+using UnityEngine.UI;
 
 public class MensagemInicial : MonoBehaviour
 {
-    [Header("Arraste o seu TextoDeAviso do Canvas para cá:")]
+    [Header("Texto de aviso do Canvas")]
     public Text textoAvisoDaTela;
+    public TMP_Text textoAvisoDaTelaTmp;
 
-    [Header("Configurações da Mensagem")]
+    [Header("ConfiguraÃ§Ãµes da mensagem")]
     public string mensagemObjetivo = "OBJETIVO: Encontre a chave principal para escapar do hospital!";
-    public float tempoNaTela = 5f; // Fica 5 segundos na tela para dar tempo de ler
+    public float tempoNaTela = 5f;
 
     void Start()
     {
-        // Assim que o jogo começa, ele joga o texto na tela
-        if (textoAvisoDaTela != null)
+        ResolverTextoAviso();
+        if (TemTextoAviso())
         {
-            textoAvisoDaTela.text = mensagemObjetivo;
+            EscreverTextoAviso(mensagemObjetivo);
             StartCoroutine(ApagarTexto());
         }
     }
 
     IEnumerator ApagarTexto()
     {
-        // Espera o tempo definido e depois limpa a tela
         yield return new WaitForSeconds(tempoNaTela);
-        textoAvisoDaTela.text = "";
+        EscreverTextoAviso("");
+    }
+
+    private void ResolverTextoAviso()
+    {
+        if (textoAvisoDaTela != null || textoAvisoDaTelaTmp != null)
+            return;
+
+        GameObject objetoTexto = GameObject.Find("TextoAviso");
+        if (objetoTexto == null)
+            return;
+
+        textoAvisoDaTela = objetoTexto.GetComponent<Text>();
+        textoAvisoDaTelaTmp = objetoTexto.GetComponent<TMP_Text>();
+    }
+
+    private bool TemTextoAviso()
+    {
+        return textoAvisoDaTela != null || textoAvisoDaTelaTmp != null;
+    }
+
+    private void EscreverTextoAviso(string texto)
+    {
+        if (textoAvisoDaTelaTmp != null)
+        {
+            textoAvisoDaTelaTmp.text = texto;
+        }
+
+        if (textoAvisoDaTela != null)
+        {
+            textoAvisoDaTela.text = texto;
+        }
     }
 }

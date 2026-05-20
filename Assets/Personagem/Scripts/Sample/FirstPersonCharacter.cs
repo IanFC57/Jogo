@@ -32,6 +32,14 @@ public class FirstPersonCharacter : MonoBehaviour
 		grounded = true;
 		rayHitComparer = new RayHitComparer();
 
+		if (Application.isMobilePlatform)
+		{
+			Cursor.lockState = CursorLockMode.None;
+			Cursor.visible = true;
+			enabled = false;
+			return;
+		}
+
 		if (lockCursor)
 		{
 			Cursor.lockState = CursorLockMode.Locked;
@@ -52,6 +60,13 @@ public class FirstPersonCharacter : MonoBehaviour
 	
 	void Update()
 	{
+		if (Application.isMobilePlatform)
+		{
+			Cursor.lockState = CursorLockMode.None;
+			Cursor.visible = true;
+			return;
+		}
+
 		if (Input.GetMouseButtonUp(0))
 		{
 			Cursor.lockState = CursorLockMode.Locked;

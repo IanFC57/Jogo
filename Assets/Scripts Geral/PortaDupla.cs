@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,18 +9,20 @@ public class PortaDupla : MonoBehaviour
 
     public float anguloAbertura = 90f;
     public float velocidade = 5f;
+    public float tempoAbertaAposInimigo = 1.5f;
 
     private Quaternion rotacaoFechadaEsq;
     private Quaternion rotacaoFechadaDir;
-
     private Quaternion alvoRotacaoEsq;
     private Quaternion alvoRotacaoDir;
+    private readonly HashSet<Collider> ocupantes = new HashSet<Collider>();
+    private float manterAbertaAte;
+    private bool estaAberta;
 
-    void Start()
+    void Awake()
     {
-        // Salva a rotação original das duas portas assim que a fase carrega
-        rotacaoFechadaEsq = eixoEsquerdo.localRotation;
-        rotacaoFechadaDir = eixoDireito.localRotation;
+        rotacaoFechadaEsq = eixoEsquerdo != null ? eixoEsquerdo.localRotation : Quaternion.identity;
+        rotacaoFechadaDir = eixoDireito != null ? eixoDireito.localRotation : Quaternion.identity;
 
         alvoRotacaoEsq = rotacaoFechadaEsq;
         alvoRotacaoDir = rotacaoFechadaDir;
@@ -29,35 +30,79 @@ public class PortaDupla : MonoBehaviour
 
     void Update()
     {
-        // Movimenta as duas portas simultaneamente de forma suave
-        eixoEsquerdo.localRotation = Quaternion.Slerp(eixoEsquerdo.localRotation, alvoRotacaoEsq, Time.deltaTime * velocidade);
-        eixoDireito.localRotation = Quaternion.Slerp(eixoDireito.localRotation, alvoRotacaoDir, Time.deltaTime * velocidade);
+        LimparOcupantesInvalidos();
+
+        if (estaAberta && DoorAccessRules.ShouldClose(ocupantes.Count, manterAbertaAte, Time.time))
+        {
+            Fechar();
+        }
+
+        if (eixoEsquerdo != null)
+        {
+            eixoEsquerdo.localRotation = Quaternion.Slerp(eixoEsquerdo.localRotation, alvoRotacaoEsq, Time.deltaTime * velocidade);
+        }
+
+        if (eixoDireito != null)
+        {
+            eixoDireito.localRotation = Quaternion.Slerp(eixoDireito.localRotation, alvoRotacaoDir, Time.deltaTime * velocidade);
+        }
+    }
+
+    public void AbrirPorInimigo(Vector3 posicaoAtor)
+    {
+        AbrirPara(posicaoAtor);
+        manterAbertaAte = Time.time + tempoAbertaAposInimigo;
     }
 
     private void OnTriggerEnter(Collider outro)
     {
-        if (outro.CompareTag("Player"))
-        {
-            // Calcula de qual lado o jogador está vindo em relação ao sensor invisível
-            Vector3 direcaoJogador = outro.transform.position - transform.position;
-            float dot = Vector3.Dot(transform.forward, direcaoJogador);
+        if (!DoorActorUtility.IsDoorActor(outro))
+            return;
 
-            // Define se abre para "frente" ou para "trás"
-            float multiplicador = (dot >= 0) ? -1f : 1f;
-
-            // A porta esquerda gira para um lado, a direita gira para o lado inverso
-            alvoRotacaoEsq = rotacaoFechadaEsq * Quaternion.Euler(0, anguloAbertura * multiplicador, 0);
-            alvoRotacaoDir = rotacaoFechadaDir * Quaternion.Euler(0, -anguloAbertura * multiplicador, 0);
-        }
+        ocupantes.Add(outro);
+        AbrirPara(DoorActorUtility.GetActorPosition(outro));
     }
 
     private void OnTriggerExit(Collider outro)
     {
-        if (outro.CompareTag("Player"))
+        if (!DoorActorUtility.IsDoorActor(outro))
+            return;
+
+        ocupantes.Remove(outro);
+        if (ocupantes.Count == 0)
         {
-            // Manda as duas portas de volta para a posição original
-            alvoRotacaoEsq = rotacaoFechadaEsq;
-            alvoRotacaoDir = rotacaoFechadaDir;
+            manterAbertaAte = Time.time + tempoAbertaAposInimigo;
+        }
+    }
+
+    private void AbrirPara(Vector3 posicaoAtor)
+    {
+        Vector3 direcaoAtor = posicaoAtor - transform.position;
+        float dot = Vector3.Dot(transform.forward, direcaoAtor);
+        float multiplicador = dot >= 0f ? -1f : 1f;
+
+        alvoRotacaoEsq = rotacaoFechadaEsq * Quaternion.Euler(0f, anguloAbertura * multiplicador, 0f);
+        alvoRotacaoDir = rotacaoFechadaDir * Quaternion.Euler(0f, -anguloAbertura * multiplicador, 0f);
+        manterAbertaAte = Time.time + tempoAbertaAposInimigo;
+        estaAberta = true;
+    }
+
+    private void Fechar()
+    {
+        alvoRotacaoEsq = rotacaoFechadaEsq;
+        alvoRotacaoDir = rotacaoFechadaDir;
+        estaAberta = false;
+    }
+
+    private void LimparOcupantesInvalidos()
+    {
+        if (ocupantes.Count == 0)
+            return;
+
+        ocupantes.RemoveWhere(colisor => colisor == null || !colisor.enabled || !colisor.gameObject.activeInHierarchy);
+        if (ocupantes.Count == 0)
+        {
+            manterAbertaAte = Mathf.Max(manterAbertaAte, Time.time + tempoAbertaAposInimigo);
         }
     }
 }

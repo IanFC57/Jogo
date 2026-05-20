@@ -1,5 +1,12 @@
 fileFormatVersion: 2
 guid: 1398c3d066794af49999ae8b3281a5f0
+AssetOrigin:
+  serializedVersion: 1
+  productId: 357196
+  packageName: FREE BUTTON SPRITES
+  packageVersion: 1.0
+  assetPath: Assets/Free_Button_Sprites/AllButtons/Green_Buttons/Green_Button_1.png
+  uploadId: 851046
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -95,14 +102,14 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 3
     buildTarget: Android
-    maxTextureSize: 2048
+    maxTextureSize: 1024
     resizeAlgorithm: 0
-    textureFormat: -1
+    textureFormat: 50
     textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
-    overridden: 0
+    overridden: 1
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
@@ -125,10 +132,3 @@ TextureImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 357196
-  packageName: FREE BUTTON SPRITES
-  packageVersion: 1.0
-  assetPath: Assets/Free_Button_Sprites/AllButtons/Green_Buttons/Green_Button_1.png
-  uploadId: 851046

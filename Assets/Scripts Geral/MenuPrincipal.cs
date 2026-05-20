@@ -5,18 +5,42 @@ using UnityEngine.SceneManagement; // BIBLIOTECA ESSENCIAL: Permite trocar de ce
 
 public class MenuPrincipal : MonoBehaviour
 {
-    // Criamos uma variável para você digitar o nome da sua cena de jogo no Unity
-    public string nomeDaCenaDoJogo;
+    // Criamos uma variÃ¡vel para vocÃª digitar o nome da sua cena de jogo no Unity
+    public string nomeDaCenaDoJogo = "JogoComMenu";
+    public GameObject menuPrincipal;
+    public GameObject menuOpcoes;
 
     public void Comecar()
+    {
+        Jogar();
+    }
+
+    public void Jogar()
     {
         // Esse comando procura a cena pelo nome e a carrega
         SceneManager.LoadScene(nomeDaCenaDoJogo);
     }
 
+    public void AbrirOpcoes()
+    {
+        if (menuPrincipal != null) menuPrincipal.SetActive(false);
+        if (menuOpcoes != null) menuOpcoes.SetActive(true);
+    }
+
+    public void FecharOpcoes()
+    {
+        if (menuOpcoes != null) menuOpcoes.SetActive(false);
+        if (menuPrincipal != null) menuPrincipal.SetActive(true);
+    }
+
     public void SairDoJogo()
     {
-        // Esse comando fecha o aplicativo (funciona no celular após o build)
+        SairJogo();
+    }
+
+    public void SairJogo()
+    {
+        // Esse comando fecha o aplicativo (funciona no celular apÃ³s o build)
         Application.Quit();
         Debug.Log("O jogador saiu do jogo.");
     }

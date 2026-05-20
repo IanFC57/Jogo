@@ -32,7 +32,11 @@ public class MovimentoMobile : MonoBehaviour
 
         // Calcula a direção levando em conta para onde o corpo está virado.
         // Assim, se ele olhar para a direita e apertar "frente", ele vai para a direita do mapa!
-        Vector3 movimento = (transform.right * direcaoX) + (transform.forward * direcaoZ);
+        Vector3 movimento = MobileMovementVector.CalculateWorldDirection(
+            transform.right,
+            transform.forward,
+            direcaoX,
+            direcaoZ);
 
         // Aplica a força da caminhada. O "rb.velocity.y" mantém a gravidade normal funcionando.
         rb.velocity = new Vector3(movimento.x * velocidadeDeCaminhada, rb.velocity.y, movimento.z * velocidadeDeCaminhada);

@@ -30,6 +30,11 @@ public class MouseRotator : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		originalRotation = transform.localRotation;
+
+		if (!MobileRuntimeInputRules.ShouldUseDesktopInput(Application.isMobilePlatform))
+		{
+			enabled = false;
+		}
 	}
 	
 	// Update is called once per frame

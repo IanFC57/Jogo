@@ -524,7 +524,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   temChavePrincipal: 0
-  balasNoBolso: 0
+  balasNoBolso: 300
   pilhasNoBolso: 0
 --- !u!114 &-6109901090016166576
 MonoBehaviour:

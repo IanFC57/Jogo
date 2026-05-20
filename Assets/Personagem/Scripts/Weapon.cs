@@ -138,6 +138,11 @@ public class Weapon : MonoBehaviour
 	public float reloadTime = 2.0f;						// How much time it takes to reload the weapon
 	public bool showCurrentAmmo = true;					// Whether or not the current ammo should be displayed in the GUI
 	public bool reloadAutomatically = true;				// Whether or not the weapon should reload automatically when out of ammo
+	public int CurrentAmmo => currentAmmo;
+	public int AmmoCapacity => ammoCapacity;
+	public bool IsReloading => fireTimer < 0f;
+	public bool NeedsAmmo => !infiniteAmmo && currentAmmo < ammoCapacity;
+	public event System.Action<Weapon> AmmoChanged;
 
 	// Accuracy
 	public float accuracy = 80.0f;						// How accurate this weapon is on a scale of 0 to 100
@@ -258,6 +263,12 @@ public class Weapon : MonoBehaviour
 		// Initialize the bullet hole pools list
 		for (int i = 0; i < bulletHolePoolNames.Count; i++)
 		{
+			if (i >= bulletHoleGroups.Count)
+			{
+				Debug.LogWarning("Bullet Hole Pool configuration is incomplete.  Please keep pool names and groups with the same size.");
+				continue;
+			}
+
 			GameObject g = GameObject.Find(bulletHolePoolNames[i]);
 
 			if (g != null && g.GetComponent<BulletHolePool>() != null)
@@ -269,9 +280,15 @@ public class Weapon : MonoBehaviour
 		// Initialize the default bullet hole pools list
 		for (int i = 0; i < defaultBulletHolePoolNames.Count; i++)
 		{
+			if (i >= defaultBulletHoles.Count)
+			{
+				Debug.LogWarning("Default Bullet Hole Pool configuration is incomplete.  Please keep pool names and pools with the same size.");
+				continue;
+			}
+
 			GameObject g = GameObject.Find(defaultBulletHolePoolNames[i]);
 
-			if (g.GetComponent<BulletHolePool>() != null)
+			if (g != null && g.GetComponent<BulletHolePool>() != null)
 				defaultBulletHoles[i] = g.GetComponent<BulletHolePool>();
 			else
 				Debug.LogWarning("Default Bullet Hole Pool does not have a BulletHolePool component.  Please assign GameObjects in the inspector that have the BulletHolePool component.");
@@ -298,7 +315,7 @@ public class Weapon : MonoBehaviour
 		}
 
 		// Reload if the weapon is out of ammo
-		if (reloadAutomatically && currentAmmo <= 0)
+		if (reloadAutomatically && currentAmmo <= 0 && !Application.isMobilePlatform)
 			Reload();
 
 		// Recoil Recovery
@@ -424,6 +441,11 @@ public class Weapon : MonoBehaviour
 	// A public method that causes the weapon to fire - can be called from other scripts - calls AI Firing for now
 	public void RemoteFire()
 	{
+		if (WeaponRemoteFirePolicy.ShouldReleaseSemiAutoGate(auto == Auto.Semi))
+		{
+			canFire = true;
+		}
+
 		AIFiring();
 	}
 
@@ -584,7 +606,10 @@ public class Weapon : MonoBehaviour
 
 		// Subtract 1 from the current ammo
 		if (!infiniteAmmo)
-			currentAmmo--;
+		{
+			currentAmmo = WeaponAmmoFlow.ConsumeRound(currentAmmo, infiniteAmmo);
+			NotifyAmmoChanged();
+		}
 
 
 		// Fire once for each shotPerRound value
@@ -615,12 +640,7 @@ public class Weapon : MonoBehaviour
 				}
 				
 				// Damage
-				hit.collider.gameObject.SendMessageUpwards("ChangeHealth", -damage, SendMessageOptions.DontRequireReceiver);
-				
-				if (shooterAIEnabled)
-				{
-					hit.transform.SendMessageUpwards("Damage", damage / 100, SendMessageOptions.DontRequireReceiver);
-				}
+				ApplyRaycastDamage(hit, damage);
 
 				if (bloodyMessEnabled)
 				{
@@ -825,7 +845,10 @@ public class Weapon : MonoBehaviour
 
 		// Subtract 1 from the current ammo
 		if (!infiniteAmmo)
-			currentAmmo--;
+		{
+			currentAmmo = WeaponAmmoFlow.ConsumeRound(currentAmmo, infiniteAmmo);
+			NotifyAmmoChanged();
+		}
 		
 		// Fire once for each shotPerRound value
 		for (int i = 0; i < shotPerRound; i++)
@@ -898,7 +921,8 @@ public class Weapon : MonoBehaviour
 		LineRenderer beamLR = beamGO.GetComponent<LineRenderer>();
 		beamLR.material = beamMaterial;
 		beamLR.material.SetColor("_TintColor", beamColor);
-		beamLR.SetWidth(startBeamWidth, endBeamWidth);
+		beamLR.startWidth = startBeamWidth;
+		beamLR.endWidth = endBeamWidth;
 
 		// The number of reflections
 		int reflections = 0;
@@ -953,13 +977,7 @@ public class Weapon : MonoBehaviour
 				}
 
 				// Damage
-				hit.collider.gameObject.SendMessageUpwards("ChangeHealth", -beamPower, SendMessageOptions.DontRequireReceiver);
-
-				// Shooter AI support
-				if (shooterAIEnabled)
-				{
-					hit.transform.SendMessageUpwards("Damage", beamPower / 100, SendMessageOptions.DontRequireReceiver);
-				}
+				ApplyRaycastDamage(hit, beamPower);
 
 				// Bloody Mess support
 				if (bloodyMessEnabled)
@@ -999,7 +1017,7 @@ public class Weapon : MonoBehaviour
 		} while (keepReflecting && reflections < maxReflections && reflect && (reflectionMaterial == null || (FindMeshRenderer(hit.collider.gameObject) != null && FindMeshRenderer(hit.collider.gameObject).sharedMaterial == reflectionMaterial)));
 
 		// Set the positions of the vertices of the line renderer beam
-		beamLR.SetVertexCount(reflectionPoints.Count);
+		beamLR.positionCount = reflectionPoints.Count;
 		for (int i = 0; i < reflectionPoints.Count; i++)
 		{
 			beamLR.SetPosition(i, reflectionPoints[i]);
@@ -1052,16 +1070,78 @@ public class Weapon : MonoBehaviour
 		SendMessageUpwards("OnEasyWeaponsStopBeaming", SendMessageOptions.DontRequireReceiver);
 	}
 
+	private void ApplyRaycastDamage(RaycastHit hit, float damage)
+	{
+		EnemyHitbox enemyHitbox = hit.collider.GetComponent<EnemyHitbox>();
+		if (enemyHitbox != null)
+		{
+			enemyHitbox.ApplyWeaponDamage(damage);
+			return;
+		}
+
+		EnemyHealth enemyHealth = hit.collider.GetComponentInParent<EnemyHealth>();
+		if (enemyHealth != null)
+		{
+			enemyHealth.ApplyWeaponHit(damage, EnemyHitZone.Body);
+			return;
+		}
+
+		hit.collider.gameObject.SendMessageUpwards("ChangeHealth", -damage, SendMessageOptions.DontRequireReceiver);
+
+		if (shooterAIEnabled)
+		{
+			hit.transform.SendMessageUpwards("Damage", damage / 100, SendMessageOptions.DontRequireReceiver);
+		}
+	}
+
 
 	// Reload the weapon
-	void Reload()
+	public void Reload()
 	{
+		if (!infiniteAmmo && currentAmmo >= ammoCapacity)
+			return;
+
 		currentAmmo = ammoCapacity;
 		fireTimer = -reloadTime;
-		GetComponent<AudioSource>().PlayOneShot(reloadSound);
+		PlayReloadSound();
+		NotifyAmmoChanged();
 
 		// Send a messsage so that users can do other actions whenever this happens
 		SendMessageUpwards("OnEasyWeaponsReload", SendMessageOptions.DontRequireReceiver);
+	}
+
+	public int ReloadFromReserve(int reserveAmmo)
+	{
+		if (infiniteAmmo)
+		{
+			Reload();
+			return 0;
+		}
+
+		int reloadAmount = AmmoReloadMath.GetReloadAmount(currentAmmo, ammoCapacity, reserveAmmo);
+		if (reloadAmount <= 0)
+			return 0;
+
+		currentAmmo += reloadAmount;
+		fireTimer = -reloadTime;
+		PlayReloadSound();
+		NotifyAmmoChanged();
+
+		SendMessageUpwards("OnEasyWeaponsReload", SendMessageOptions.DontRequireReceiver);
+		return reloadAmount;
+	}
+
+	private void PlayReloadSound()
+	{
+		if (reloadSound != null)
+		{
+			GetComponent<AudioSource>().PlayOneShot(reloadSound);
+		}
+	}
+
+	private void NotifyAmmoChanged()
+	{
+		AmmoChanged?.Invoke(this);
 	}
 
 	// When the weapon tries to fire without any ammo

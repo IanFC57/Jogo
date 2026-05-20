@@ -54,6 +54,15 @@ public class FirstPersonHeadBob : MonoBehaviour {
 	void Start () {
 
 		originalLocalPos = head.localPosition;
+
+		if (!MobileRuntimeInputRules.ShouldUseMovementHeadBob(Application.isMobilePlatform))
+		{
+			head.localPosition = originalLocalPos;
+			head.localRotation = Quaternion.identity;
+			enabled = false;
+			return;
+		}
+
 		character = GetComponent<FirstPersonCharacter>();
 		if (GetComponent<AudioSource>() == null)
 		{

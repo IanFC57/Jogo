@@ -1,48 +1,71 @@
 using System.Collections;
-using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
-using UnityEngine.UI; // NOVA LINHA
 using UnityEngine.SceneManagement;
-using System.Collections; // NOVA LINHA
+using UnityEngine.UI;
 
 public class PortaDeFuga : MonoBehaviour
 {
-    [Header("Arraste o seu TextoDeAviso do Canvas para cá:")]
+    [Header("Texto de aviso do Canvas")]
     public Text textoAvisoDaTela;
+    public TMP_Text textoAvisoDaTelaTmp;
 
     private void OnTriggerEnter(Collider outro)
     {
-        if (outro.CompareTag("Player"))
+        if (!outro.CompareTag("Player"))
+            return;
+
+        ResolverTextoAviso();
+        InventarioJogador inventario = outro.GetComponent<InventarioJogador>();
+        if (inventario != null && inventario.temChavePrincipal)
         {
-            InventarioJogador inventario = outro.GetComponent<InventarioJogador>();
+            EscreverTextoAviso("VOCÃŠ ESCAPOU DO HOSPITAL!");
+            SceneManager.LoadScene("Final");
+            return;
+        }
 
-            // Verifica se tem o inventário e se a chave principal é verdadeira
-            if (inventario != null && inventario.temChavePrincipal == true)
-            {
-                textoAvisoDaTela.text = "VOCÊ ESCAPOU DO HOSPITAL!";
-
-                // Recarrega a fase (ou você pode carregar uma cena de Vitória aqui)
-                SceneManager.LoadScene("Final");
-            }
-            else
-            {
-                // Se NÃO tem a chave, mostra o aviso na tela!
-                if (textoAvisoDaTela != null)
-                {
-                    textoAvisoDaTela.text = "A porta está trancada... Você precisa encontrar a chave!";
-
-                    // Inicia o temporizador para apagar essa mensagem
-                    StopAllCoroutines();
-                    StartCoroutine(ApagarTextoTrancado());
-                }
-            }
+        if (TemTextoAviso())
+        {
+            EscreverTextoAviso("A porta estÃ¡ trancada... VocÃª precisa encontrar a chave!");
+            StopAllCoroutines();
+            StartCoroutine(ApagarTextoTrancado());
         }
     }
 
     IEnumerator ApagarTextoTrancado()
     {
-        // Espera 3 segundos e apaga o aviso da porta
         yield return new WaitForSeconds(3f);
-        textoAvisoDaTela.text = "";
+        EscreverTextoAviso("");
+    }
+
+    private void ResolverTextoAviso()
+    {
+        if (textoAvisoDaTela != null || textoAvisoDaTelaTmp != null)
+            return;
+
+        GameObject objetoTexto = GameObject.Find("TextoAviso");
+        if (objetoTexto == null)
+            return;
+
+        textoAvisoDaTela = objetoTexto.GetComponent<Text>();
+        textoAvisoDaTelaTmp = objetoTexto.GetComponent<TMP_Text>();
+    }
+
+    private bool TemTextoAviso()
+    {
+        return textoAvisoDaTela != null || textoAvisoDaTelaTmp != null;
+    }
+
+    private void EscreverTextoAviso(string texto)
+    {
+        if (textoAvisoDaTelaTmp != null)
+        {
+            textoAvisoDaTelaTmp.text = texto;
+        }
+
+        if (textoAvisoDaTela != null)
+        {
+            textoAvisoDaTela.text = texto;
+        }
     }
 }
