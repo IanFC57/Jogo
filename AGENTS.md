@@ -43,12 +43,26 @@ Este projeto Unity é um FPS de terror com prioridade absoluta para Android real
 - A porta/sala final de fuga é uma área de conclusão trancada. Inimigos não podem nascer perto dela nem dentro dela, e essa porta trancada não deve ser tratada como porta que inimigos conseguem abrir.
 - Portas normais de navegação podem abrir para jogador e inimigos, permitindo que monstros cruzem passagens jogáveis.
 
+## Contrato De Colisão E Portas
+
+- Paredes, chão, teto, escadas e a porta final de conclusão continuam sólidos.
+- Apenas folhas e molduras/batentes de portas que possuem controlador de abertura e trigger ativo devem ficar sem collider sólido. Elas existem visualmente, mas não podem prender o jogador nem impedir a perseguição dos inimigos.
+- Portas, molduras e batentes sem trigger de abertura não levam a uma passagem jogável: precisam manter collider sólido quando existir e devem participar do bake da NavMesh.
+- Eixos de animação de porta (`eixoDaPorta`, `eixoEsquerdo`, `eixoDireito` ou equivalente) devem apontar para a folha/eixo da porta. Nunca aponte esses campos para moldura, batente, sensor ou trigger.
+- A porta/sala final de fuga continua bloqueando fisicamente e continua excluída do spawn inimigo.
+- Cadeiras, bancos, caixas, macas pequenas e objetos semelhantes devem ser empurráveis, com `Rigidbody`, `BoxCollider` simples, gravidade e sem flag estática.
+- Objetos decorativos pequenos, finos ou pendurados não devem bloquear movimento. Quando forem liberados, devem ser ignorados no bake da NavMesh.
+- Portas e materiais de porta devem ficar foscos, sem emissão e sem reflection probe para evitar o efeito de “porta iluminada” quando o jogador olha para elas.
+- Reflection probes da cena de gameplay devem respeitar o limite de intensidade em `GameplayCollisionTuningRules.ReflectionProbeMaxIntensity`.
+- Rode `Tools/Gameplay/Apply Collision Tuning And Rebuild NavMesh` depois de mexer no prefab `Asylum`, na cena `JogoComMenu`, em materiais de porta ou em regras de classificação de colisão.
+
 ## Arquivos Principais
 
 - `Assets/Scripts Geral/Controles/CameraMobile.cs`: aplica rotação da câmera.
 - `Assets/Scripts Geral/Controles/Core/MobileCameraRules.cs`: concentra constantes de câmera mobile, incluindo sensibilidade.
 - `Assets/Scripts Geral/Controles/Core/MobileCameraTouchPolicy.cs`: define a regra testável de qual dedo pode girar a câmera.
 - `Assets/Scripts Geral/Controles/Core/MobileTouchZones.cs`: zonas normalizadas compartilhadas para joystick, atirar, recarregar e câmera.
+- `Assets/Scripts Geral/Controles/Core/GameplayCollisionTuningRules.cs`: classifica portas, porta final, objetos empurráveis e decoração passável.
 - `Assets/Scripts Geral/Controles/MobileTouchInputBridge.cs`: despacha toques mobile para UI Unity e componentes de joystick.
 - `Assets/Scripts Geral/Controles/MovimentoMobile.cs`: aplica movimento do joystick por vetor local limitado.
 - `Assets/Scripts Geral/Controles/MobileInputRuntimeProbe.cs`: probe de development build usado para validar Android físico via logcat.
@@ -65,9 +79,10 @@ Este projeto Unity é um FPS de terror com prioridade absoluta para Android real
 - `Assets/Editor/AndroidBuildConsistency.cs`: centraliza as configurações Android compartilhadas entre build por script e build pelo Editor.
 - `Assets/Editor/AndroidBuild.cs`: gera APKs versionadas e expõe `Tools/Android/Build APK Igual Ao Script`.
 - `Assets/Editor/AndroidBrandingAndTypography.cs`: aplica ícone Android e padroniza textos de Canvas com TextMeshPro.
+- `Assets/Editor/GameplaySceneCollisionAndDoorTuner.cs`: aplica tuning de colisão, portas abríveis versus portas bloqueantes, objetos empurráveis, reflection probes e NavMesh antes do build.
 - A tela inicial deve manter os botões funcionais com a mesma fonte, mesmo tamanho fixo e sem autosizing; não reative o botão duplicado sem ação `Button (Legacy) (1)`.
-- A tela final deve manter título de fase concluída, subtítulo atmosférico e botões `Jogar novamente`, `Menu inicial` e `Sair do jogo`.
-- `Assets/Tests/EditMode`: testes de contrato para toque mobile, vetores de movimento, regras runtime, munição, recarga, dano inimigo, áudio de monstro e spawn.
+- A tela final deve mostrar apenas os botões Unity `Jogar novamente`, `Menu inicial` e `Sair do jogo` sobre a imagem de fundo. Não adicione título ou subtítulo via UI nessa cena; o texto atmosférico válido é o que já está incorporado na arte de fundo.
+- `Assets/Tests/EditMode`: testes de contrato para toque mobile, vetores de movimento, regras runtime, munição, recarga, dano inimigo, áudio de monstro, spawn, colisão de cenário, portas e objetos empurráveis.
 
 ## Regras De Trabalho
 
@@ -75,4 +90,5 @@ Este projeto Unity é um FPS de terror com prioridade absoluta para Android real
 - Prefira políticas determinísticas de input com testes em vez de checagens improvisadas dentro de loops por frame.
 - Não adicione comportamento novo de controle mobile, munição, combate, UI, áudio ou spawn sem documentar em `AGENTS.md` e no arquivo relevante dentro de `docs/`.
 - Não mude números de dano inimigo, cadência de spawn ou zonas de toque sem atualizar testes EditMode correspondentes.
+- Não mude colisão de portas, obstáculos, decoração, porta final ou reflection probes sem atualizar `docs/gameplay-colisao-e-portas.md` e os testes EditMode correspondentes.
 - Todos os arquivos Markdown do projeto devem permanecer em português do Brasil.

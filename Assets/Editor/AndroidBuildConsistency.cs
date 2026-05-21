@@ -12,6 +12,7 @@ public static class AndroidBuildConsistency
 {
     public const string PackageName = "com.IanHeitor.AsylumHorror";
     public const string DefaultBuildDirectory = "Builds/Android";
+    public const AndroidSdkVersions MinimumSupportedSdkVersion = AndroidSdkVersions.AndroidApiLevel23;
 
     private static bool scriptBuildInProgress;
 
@@ -39,7 +40,7 @@ public static class AndroidBuildConsistency
         PlayerSettings.SetGraphicsAPIs(BuildTarget.Android, new[] { GraphicsDeviceType.Vulkan, GraphicsDeviceType.OpenGLES3 });
 
         PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARMv7 | AndroidArchitecture.ARM64;
-        PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel26;
+        PlayerSettings.Android.minSdkVersion = MinimumSupportedSdkVersion;
         PlayerSettings.defaultInterfaceOrientation = UIOrientation.LandscapeLeft;
         PlayerSettings.allowedAutorotateToPortrait = false;
         PlayerSettings.allowedAutorotateToPortraitUpsideDown = false;
@@ -146,8 +147,9 @@ public sealed class AndroidEditorBuildPreprocessor : IPreprocessBuildWithReport
             Debug.Log($"Android editor build version prepared: versionCode={versionCode}, versionName={PlayerSettings.bundleVersion}.");
         }
 
+        GameplaySceneCollisionAndDoorTuner.Apply();
         AndroidBrandingAndTypography.Apply();
         AssetDatabase.SaveAssets();
-        Debug.Log("Android build preflight applied: editor APK builds now use the same Android settings, branding and typography pipeline as AndroidBuild.BuildApk.");
+        Debug.Log("Android build preflight applied: editor APK builds now use the same Android settings, gameplay collision tuning, branding and typography pipeline as AndroidBuild.BuildApk.");
     }
 }

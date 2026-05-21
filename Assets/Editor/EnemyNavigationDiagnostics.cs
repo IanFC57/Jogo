@@ -1,9 +1,11 @@
+using System.Collections.Generic;
 using System.Text;
 using Unity.AI.Navigation;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.SceneManagement;
 
 public static class EnemyNavigationDiagnostics
 {
@@ -100,11 +102,13 @@ public static class EnemyNavigationDiagnostics
     private static int ApplyDoorLeafModifiers()
     {
         int changed = 0;
+        Scene scene = SceneManager.GetActiveScene();
+        HashSet<GameObject> openableDoorParts = GameplaySceneCollisionAndDoorTuner.CollectOpenableDoorParts(scene.GetRootGameObjects());
         GameObject[] objects = Object.FindObjectsByType<GameObject>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
 
         foreach (GameObject obj in objects)
         {
-            if (!LooksLikeMovingDoorLeaf(obj))
+            if (!openableDoorParts.Contains(obj))
                 continue;
 
             NavMeshModifier modifier = obj.GetComponent<NavMeshModifier>();
@@ -319,23 +323,6 @@ public static class EnemyNavigationDiagnostics
 
         return false;
     }
-
-    private static bool LooksLikeMovingDoorLeaf(GameObject obj)
-    {
-        string name = obj.name.ToLowerInvariant();
-
-        if (!(name.Contains("door") || name.Contains("porta")))
-            return false;
-
-        if (name.Contains("fuga") || obj.GetComponent<PortaDeFuga>() != null)
-            return false;
-
-        if (name.Contains("frame") || name.Contains("moldura") || name.Contains("eixo") || name.Contains("trigger"))
-            return false;
-
-        return obj.GetComponent<MeshRenderer>() != null || obj.GetComponent<MeshCollider>() != null;
-    }
-
     private static Transform FindPlayer()
     {
         GameObject player = GameObject.FindGameObjectWithTag("Player");

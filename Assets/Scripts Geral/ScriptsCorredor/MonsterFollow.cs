@@ -53,8 +53,10 @@ public class MonsterFollow : MonoBehaviour
     private Vector3 ultimoDestinoJogador;
     private NavMeshPath caminhoCalculado;
     private float pitchAmbiente = 1f;
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
     private bool ambienteAudivelReportado;
     private bool ataqueReportado;
+#endif
     private static AudioClip somAmbienteRecurso;
     private static AudioClip somAtaqueRecurso;
     private static AudioClip somMorteRecurso;
@@ -94,8 +96,10 @@ public class MonsterFollow : MonoBehaviour
         GarantirFontesDeAudio();
         caminhoCalculado ??= new NavMeshPath();
         pitchAmbiente = Random.Range(0.92f, 1.04f);
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
         ambienteAudivelReportado = false;
         ataqueReportado = false;
+#endif
         ConfigurarAgente();
         ConfigurarAudio();
         ResetarEstadoDeNavegacao();
@@ -156,8 +160,10 @@ public class MonsterFollow : MonoBehaviour
             fonte.volume = 0f;
         }
 
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
         ambienteAudivelReportado = false;
         ataqueReportado = false;
+#endif
     }
 
     public void TocarSomMorte()

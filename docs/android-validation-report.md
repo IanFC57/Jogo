@@ -3,18 +3,19 @@
 Último pacote validado:
 
 - Aparelho: `RQ8RB09CM6D`, Samsung `SM-G780G`, Android 13.
-- APK: `Builds/Android/AsylumHorror-39.apk`.
+- APK: `Builds/Android/AsylumHorror-49.apk`.
 - Pacote instalado: `com.IanHeitor.AsylumHorror`.
-- Versão instalada: `versionCode=39`, `versionName=1.0.39`.
-- Horário de atualização no aparelho: `2026-05-20 17:28:45`.
+- Versão instalada: `versionCode=49`, `versionName=1.0.49`.
+- Horário de atualização no aparelho: `2026-05-20 23:22:13`.
 
 ## Comportamentos Validados
 
 - O app abre no aparelho Android físico.
+- A APK v49 foi instalada no aparelho físico com `versionCode=49` e `versionName=1.0.49`.
 - O toque no menu principal inicia o jogo por `MobileTouchInputBridge`.
 - A UI de gameplay carrega com joystick, `Recarregar`, `Atirar`, vida e munição abaixo da vida.
-- Testes EditMode passaram: 76 testes executados, 76 aprovados.
-- Build Android v39 foi concluído sem `warning CS`, sem `error CS`, sem referência antiga de Code Coverage e sem falha de build. O log ainda pode mostrar mensagens externas de licença do Unity Hub antes da compilação.
+- Testes EditMode da v49 passaram: 90 testes executados, 90 aprovados.
+- Build Android v49 foi concluído sem `warning CS`, sem `error CS`, sem referência antiga de Code Coverage e sem falha de build. O log ainda pode mostrar mensagens externas de licença do Unity Hub antes da compilação.
 - A validação física Android usou probes runtime via logcat.
 - Movimento pelo joystick não alterou yaw, pitch nem roll da câmera.
 - O olhar por área livre alterou a câmera.
@@ -51,7 +52,40 @@
 
 - Em `2026-05-20`, a APK `Builds/Android/AsylumHorror-43.apk` foi gerada com `versionCode=43` e `versionName=1.0.43`.
 - A APK v43 foi instalada no aparelho `RQ8RB09CM6D`, com `lastUpdateTime=2026-05-20 20:09:49`.
-- A tela de encerramento passou a exibir título, subtítulo e ações `Jogar novamente`, `Menu inicial` e `Sair do jogo`.
+- A tela de encerramento mantém apenas os botões Unity `Jogar novamente`, `Menu inicial` e `Sair do jogo` sobre a arte de fundo.
 - Os botões mobile `Atirar` e `Recarregar` foram aumentados em 50% e continuam na região inferior direita.
 - Testes EditMode v43: 81 testes executados, 81 aprovados.
 - O build Android v43 foi concluído sem `warning CS`, sem `error CS`, sem falha Gradle e sem resíduos antigos de Code Coverage.
+
+## Validação Da v46
+
+- Em `2026-05-20`, a APK `Builds/Android/AsylumHorror-46.apk` foi gerada com `versionCode=46` e `versionName=1.0.46`.
+- A APK v46 foi instalada no aparelho `RQ8RB09CM6D`, Samsung `SM-G780G`, Android 13, com `lastUpdateTime=2026-05-20 22:20:25`.
+- O `aapt dump badging` confirmou `package=com.IanHeitor.AsylumHorror`, `sdkVersion=23`, `targetSdkVersion=33` e código nativo `arm64-v8a`/`armeabi-v7a`.
+- O build executou o `GameplaySceneCollisionAndDoorTuner` no caminho do script e no preflight do Editor, confirmando que a APK por script e pelo Editor recebem o mesmo tuning.
+- Testes EditMode v46: 89 testes executados, 89 aprovados.
+- O build Android v46 foi concluído sem `warning CS`, sem `error CS`, sem `BuildFailedException`, sem `BUILD FAILED` e sem `Fatal Error`.
+- O logcat confirmou inicialização Unity da versão `1.0.46` no aparelho físico, sem `FATAL EXCEPTION`, `NullReferenceException`, `MissingMethodException` ou `Fatal signal` do processo do jogo.
+- O aparelho estava com a tela bloqueada durante a abertura remota; por isso a Activity ficou atrás do `Bouncer`, mas o processo do jogo iniciou com PID ativo e sem crash.
+
+## Validação Da v48
+
+- Em `2026-05-20`, a APK `Builds/Android/AsylumHorror-48.apk` foi gerada com `versionCode=48` e `versionName=1.0.48`.
+- A APK v48 foi instalada no aparelho `RQ8RB09CM6D`, Samsung `SM-G780G`, Android 13, com `lastUpdateTime=2026-05-20 22:56:09`.
+- O `aapt dump badging` confirmou `package=com.IanHeitor.AsylumHorror`, `sdkVersion=23`, `targetSdkVersion=33` e código nativo `arm64-v8a`/`armeabi-v7a`.
+- A tela final agora deixa ativos apenas os botões Unity, em uma fileira horizontal baixa, com fundo transparente seguindo o padrão da tela inicial.
+- Folhas e molduras/batentes de portas comuns ficam sem colliders sólidos e são ignorados no bake da NavMesh; a porta final continua bloqueando.
+- O tuning removeu 33 colliders sólidos adicionais de molduras comuns, adicionou 34 modificadores de NavMesh e manteve os pontos fixos de spawn com caminho completo até o jogador.
+- Testes EditMode v48: 89 testes executados, 89 aprovados.
+- O build Android v48 foi concluído sem `warning CS`, sem `error CS`, sem `BuildFailedException`, sem `BUILD FAILED` e sem `Fatal Error`.
+
+## Validação Da v49
+
+- Em `2026-05-20`, a APK `Builds/Android/AsylumHorror-49.apk` foi gerada com `versionCode=49` e `versionName=1.0.49`.
+- A APK v49 foi instalada no aparelho `RQ8RB09CM6D`, Samsung `SM-G780G`, Android 13, com `lastUpdateTime=2026-05-20 23:22:13`.
+- O `aapt dump badging` confirmou `package=com.IanHeitor.AsylumHorror`, `sdkVersion=23`, `targetSdkVersion=33` e código nativo `arm64-v8a`/`armeabi-v7a`.
+- O tuning de portas passou a separar partes abríveis de partes bloqueantes: apenas portas com controlador de abertura e trigger ativo ficam passáveis; portas e molduras sem trigger tiveram colliders/NavMesh restaurados.
+- O preflight do build confirmou `doorParts=openable:16/blocking:297`, sem ajustes pendentes de collider ou NavMesh.
+- Testes EditMode v49: 90 testes executados, 90 aprovados.
+- O build Android v49 foi concluído sem `warning CS`, sem `error CS`, sem `BuildFailedException`, sem `BUILD FAILED` e sem `Fatal Error`.
+- O smoke test no aparelho abriu `com.unity3d.player.UnityPlayerGameActivity`; o processo `com.IanHeitor.AsylumHorror` ficou ativo e o logcat não registrou `FATAL EXCEPTION`, `NullReferenceException`, `MissingMethodException` ou `Fatal signal` do processo do jogo.

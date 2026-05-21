@@ -14,6 +14,7 @@ public static class AndroidBuild
         EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Android, BuildTarget.Android);
         AndroidBuildConsistency.ApplyVersionCode(versionCode);
         AndroidBuildConsistency.ApplySharedSettings();
+        GameplaySceneCollisionAndDoorTuner.Apply();
         AndroidBrandingAndTypography.Apply();
 
         string[] scenes = AndroidBuildConsistency.GetEnabledScenes();

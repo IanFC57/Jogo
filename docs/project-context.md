@@ -10,6 +10,7 @@ O projeto é um jogo de terror Unity para Android. A prioridade atual é jogabil
 - Configuração runtime Android: `MobileTouchBootstrap` e `AndroidRuntimePerformance`.
 - Armas e munição: `Assets/Personagem/Scripts/Weapon.cs`, `ControleCarregamento`, `InventarioJogador` e `MobileAmmoHud`.
 - Combate inimigo: `GeradorDeInimigos`, `EnemyHealth`, `EnemyHitbox` e regras puras em `Assets/Scripts Geral/Controles/Core`.
+- Colisão de cenário e portas: `GameplayCollisionTuningRules`, `GameplaySceneCollisionAndDoorTuner`, prefab `Asylum` e cena `JogoComMenu`.
 - Identidade visual e tipografia Android: `Assets/Editor/AndroidBrandingAndTypography.cs`, `Assets/AppIcon/AsylumHorrorIcon.png` e TextMeshPro nas cenas de build.
 
 ## Direção Mobile Atual
@@ -26,6 +27,7 @@ O projeto é um jogo de terror Unity para Android. A prioridade atual é jogabil
 - Monstros usam áudio de proximidade com timbre de fera orgânica: o loop de perseguição aumenta de volume com a proximidade, o ataque toca um rosnado curto separado e a morte para todos os sons locais antes de tocar um rosnado final.
 - O spawn inimigo usa apenas candidatos validados na NavMesh: caminho completo até o jogador, pelo menos 14 metros de distância, fora da visão atual da câmera com margem de segurança e sem sobreposição com a área final bloqueada.
 - `EnemySpawnExclusionZone` marca áreas onde monstros nunca podem nascer. A porta/sala final de fuga deve permanecer excluída porque inimigos não podem abrir essa porta de conclusão.
+- Portas com controlador de abertura e trigger ativo, incluindo suas folhas e molduras/batentes próximos, não devem bloquear o fluxo do jogador ou dos inimigos. Portas e molduras sem trigger de abertura continuam sólidas e entram no bake da NavMesh. A porta final continua sólida. Objetos grandes de cena podem ser empurrados, decoração pequena não deve prender o jogador e portas não devem brilhar por reflection probe.
 - Não valide comportamento mobile final apenas em emulador quando houver celular físico conectado.
 
 ## Notas De Build
@@ -33,5 +35,6 @@ O projeto é um jogo de terror Unity para Android. A prioridade atual é jogabil
 - `Assets/Editor/AndroidBuildConsistency.cs` centraliza package id, IL2CPP, stripping, arquiteturas ARMv7/ARM64, APK em vez de AAB, orientação landscape, ícone e tipografia.
 - `Assets/Editor/AndroidBuild.cs` gera APKs versionadas em `Builds/Android` e também aparece no menu `Tools/Android/Build APK Igual Ao Script`.
 - O `Build Player` normal do Unity recebe o mesmo preflight Android antes de empacotar. Assim, quando a pessoa gera APK pelo Editor, as configurações críticas ficam alinhadas ao script.
+- O preflight Android também aplica o tuning de colisão/portas antes de gerar a APK, separando portas abríveis de portas bloqueantes; então builds pelo Editor e pelo script saem com o mesmo estado de cena.
 - O aparelho usado nos testes recentes é `RQ8RB09CM6D`.
 - Um resultado limpo significa ausência de erros e avisos C# no log atual de build/teste. Ruídos de licença, pacote ou inicialização da Unity devem ser analisados separadamente antes de alterar dependências.

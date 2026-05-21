@@ -15,6 +15,7 @@ public static class AndroidBrandingAndTypography
     private const string IconPath = "Assets/AppIcon/AsylumHorrorIcon.png";
     private const string FontPath = "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF.asset";
     private const float MainMenuButtonFontSize = 34f;
+    private const float VictoryButtonY = -283f;
 
     [MenuItem("Tools/Android/Apply Branding And Typography")]
     public static void Apply()
@@ -328,32 +329,13 @@ public static class AndroidBrandingAndTypography
         if (canvasRect == null)
             return;
 
-        ConfigureVictoryText(
-            canvasRect,
-            fontAsset,
-            "Texto_TituloFinal",
-            "Fase concluida",
-            new Vector2(0f, 220f),
-            new Vector2(1120f, 96f),
-            58f,
-            new Color(0.86f, 0.08f, 0.06f, 1f),
-            FontStyles.Bold);
-
-        ConfigureVictoryText(
-            canvasRect,
-            fontAsset,
-            "Texto_SubtituloFinal",
-            "Voce atravessou a noite. O silencio ainda esta observando.",
-            new Vector2(0f, 130f),
-            new Vector2(1180f, 78f),
-            31f,
-            new Color(0.92f, 0.82f, 0.75f, 1f),
-            FontStyles.Normal);
+        SetSceneObjectActive(scene, "Texto_TituloFinal", false);
+        SetSceneObjectActive(scene, "Texto_SubtituloFinal", false);
 
         MenuVitoria victoryMenu = FindSceneComponent<MenuVitoria>(scene);
-        ConfigureVictoryButton(scene, fontAsset, victoryMenu, "Button (Legacy)", "Jogar novamente", "Reiniciar", new Vector2(0f, -130f));
-        ConfigureVictoryButton(scene, fontAsset, victoryMenu, "Button (Legacy) (1)", "Menu inicial", "IrParaMenu", new Vector2(0f, -232f));
-        ConfigureVictoryButton(scene, fontAsset, victoryMenu, "Button (Legacy) (2)", "Sair do jogo", "SairDoJogo", new Vector2(0f, -334f));
+        ConfigureVictoryButton(scene, fontAsset, victoryMenu, "Button (Legacy)", "Jogar novamente", "Reiniciar", new Vector2(-480f, VictoryButtonY));
+        ConfigureVictoryButton(scene, fontAsset, victoryMenu, "Button (Legacy) (1)", "Menu inicial", "IrParaMenu", new Vector2(0f, VictoryButtonY));
+        ConfigureVictoryButton(scene, fontAsset, victoryMenu, "Button (Legacy) (2)", "Sair do jogo", "SairDoJogo", new Vector2(480f, VictoryButtonY));
     }
 
     private static void ConfigureVictoryText(
@@ -429,7 +411,7 @@ public static class AndroidBrandingAndTypography
             buttonRect.anchorMax = new Vector2(0.5f, 0.5f);
             buttonRect.pivot = new Vector2(0.5f, 0.5f);
             buttonRect.anchoredPosition = anchoredPosition;
-            buttonRect.sizeDelta = new Vector2(480f, 82f);
+            buttonRect.sizeDelta = new Vector2(430f, 82f);
             buttonRect.localScale = Vector3.one;
         }
 
@@ -437,6 +419,13 @@ public static class AndroidBrandingAndTypography
         if (button != null && victoryMenu != null)
         {
             ConfigureVictoryButtonAction(button, victoryMenu, methodName);
+        }
+
+        Image image = buttonObject.GetComponent<Image>();
+        if (image != null)
+        {
+            image.color = new Color(0.1792453f, 0.1792453f, 0.1792453f, 0f);
+            image.raycastTarget = true;
         }
 
         TextMeshProUGUI text = buttonObject.GetComponentInChildren<TextMeshProUGUI>(true);
@@ -456,12 +445,12 @@ public static class AndroidBrandingAndTypography
 
         text.text = label;
         text.font = fontAsset;
-        text.color = new Color(0.98f, 0.05f, 0.04f, 1f);
+        text.color = Color.white;
         text.fontStyle |= FontStyles.Bold;
-        text.fontSize = 31f;
+        text.fontSize = MainMenuButtonFontSize;
         text.enableAutoSizing = false;
-        text.fontSizeMin = 31f;
-        text.fontSizeMax = 31f;
+        text.fontSizeMin = MainMenuButtonFontSize;
+        text.fontSizeMax = MainMenuButtonFontSize;
         text.alignment = TextAlignmentOptions.Center;
         text.textWrappingMode = TextWrappingModes.NoWrap;
         text.overflowMode = TextOverflowModes.Truncate;
