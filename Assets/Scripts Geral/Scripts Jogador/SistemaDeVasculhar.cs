@@ -78,9 +78,20 @@ public class SistemaDeVasculhar : MonoBehaviour
 
         if (armarioAtual.quantidadeDePilhas > 0)
         {
+            // 1. Guarda a pilha no bolso (como você já tinha feito)
             inventario.pilhasNoBolso += armarioAtual.quantidadeDePilhas;
             mensagemLoot += "Você achou " + armarioAtual.quantidadeDePilhas + " pilhas!\n";
             achouAlgumaCoisa = true;
+
+            // 2. --- NOVA PARTE: RECARREGA A LANTERNA NA HORA ---
+            // Procura o script ControleLanterna no próprio Jogador (ou na Câmera dele)
+            ControleLanterna lanterna = GetComponentInChildren<ControleLanterna>();
+
+            // Se achou a lanterna, restaura os 15 segundos!
+            if (lanterna != null)
+            {
+                lanterna.RecarregarPilha();
+            }
         }
 
         if (!achouAlgumaCoisa)
